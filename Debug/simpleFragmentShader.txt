@@ -1,0 +1,36 @@
+#version 330
+out vec4 color;
+
+uniform vec3 viewPos;
+
+in vec3 LightIntensity;
+in vec3 FragPosIn;
+in vec3 normalIn;
+in vec3 lightPosIn;
+
+void main(){
+	vec3 lightColor = vec3 (1.0f,1.0f,1.0f);
+	vec3 objectColor = vec3 (0.2f,0.7f,0.2f);
+
+	//ambient
+	float ambientStrength = 0.2f;
+	vec3 ambient = ambientStrength * lightColor;
+
+	//diffuse
+	vec3 norm = normalize(normalIn);
+	vec3 lightDir = normalize(lightPosIn-FragPosIn);
+	float diff = max(dot(norm,lightDir),0.0f);
+	vec3 diffuse = diff*lightColor;
+
+	//specular
+	int power = 64;
+	float specularStrength = 7.0f;
+	vec3 viewDir = normalize(- FragPosIn);
+	vec3 reflectDir = reflect(-lightDir,norm);
+	float spec = pow(max(dot(viewDir,reflectDir),0.0),power);
+	vec3 specular = specularStrength * spec * lightColor;
+
+	//mix
+	vec3 result = (ambient+diffuse+specular)*objectColor;
+	color = vec4(LightIntensity,1.0f) + vec4(result,1.0f);
+}
